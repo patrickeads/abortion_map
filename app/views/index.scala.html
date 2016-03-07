@@ -1,0 +1,184 @@
+@(key: String)
+
+@main("My Map") {
+	<div>
+    	<div id="map" class="map"></div>
+    	<div id="legend">
+    		<table>
+    			<tr id="abortionWaitingPeriodStates">
+    				<td><canvas id="abortionWaitingPeriodStatesCanvas" width="30" height="30"></canvas></td>
+    				<td>State has a currently enforced waiting period for abortion.</td>
+    			</tr>
+    			<tr id="firearmWaitingPeriodStates">
+    				<td><canvas id="firearmWaitingPeriodStatesCanvas" width="30" height="30"></canvas></td>
+    				<td>State has waiting period for all firearms.</td>
+    			</tr>
+    			<tr id="handgunWaitingPeriodStates">
+    				<td><canvas id="handgunWaitingPeriodStatesCanvas" width="30" height="30"></canvas></td>
+    				<td>State has waiting period for handguns only.</td>
+    			</tr>
+    			<tr id="mn">
+    				<td><img src="@routes.Assets.versioned("images/stripes2.png")" /></td>
+    				<td>State has waiting periods for handguns/assault weapons and abortions.</td>
+    			</tr>
+    			<tr id="il">
+    				<td><img src="@routes.Assets.versioned("images/stripes.png")" /></td>
+    				<td>State has different waiting periods for handguns and longarms.</td>
+    			</tr>
+    			<tr id="note">
+    				<td colspan="2">Note: More deeply shaded regions indicate longer waiting periods.</td>
+    			</tr>
+    		</table>
+    	</div>
+    </div>
+    <script>
+    	var ilStripe = new Image();
+		ilStripe.src = '@routes.Assets.versioned("images/stripes1.png")';
+		var ilStripePattern = ol.dom.createCanvasContext2D().createPattern(ilStripe, 'repeat');
+		
+    	var mnStripe = new Image();
+		mnStripe.src = '@routes.Assets.versioned("images/stripes3.png")';
+		var mnStripePattern = ol.dom.createCanvasContext2D().createPattern(mnStripe, 'repeat');
+		
+       	var styles = {
+	        'red18': new ol.style.Style({
+	          stroke: new ol.style.Stroke({
+	            color: 'red',
+	            width: 1
+	          }),
+	          fill: new ol.style.Fill({
+	            color: 'rgba(255, 0, 0, 0.2)'
+	          })
+	        }),
+	        'red24': new ol.style.Style({
+	          stroke: new ol.style.Stroke({
+	            color: 'red',
+	            width: 1
+	          }),
+	          fill: new ol.style.Fill({
+	            color: 'rgba(255, 0, 0, 0.4)'
+	          })
+	        }),
+	        'red48': new ol.style.Style({
+	          stroke: new ol.style.Stroke({
+	            color: 'red',
+	            width: 1
+	          }),
+	          fill: new ol.style.Fill({
+	            color: 'rgba(255, 0, 0, 0.6)'
+	          })
+	        }),
+	        'red72': new ol.style.Style({
+	          stroke: new ol.style.Stroke({
+	            color: 'red',
+	            width: 1
+	          }),
+	          fill: new ol.style.Fill({
+	            color: 'rgba(255, 0, 0, 0.8)'
+	          })
+	        }),
+	        'blue7': new ol.style.Style({
+	          stroke: new ol.style.Stroke({
+	            color: 'blue',
+	            width: 1
+	          }),
+	          fill: new ol.style.Fill({
+	            color: 'rgba(0, 0, 255, 0.4)'
+	          })
+	        }),
+	        'blue10': new ol.style.Style({
+	          stroke: new ol.style.Stroke({
+	            color: 'blue',
+	            width: 1
+	          }),
+	          fill: new ol.style.Fill({
+	            color: 'rgba(0, 0, 255, 0.6)'
+	          })
+	        }),
+	        'blue14': new ol.style.Style({
+	          stroke: new ol.style.Stroke({
+	            color: 'blue',
+	            width: 1
+	          }),
+	          fill: new ol.style.Fill({
+	            color: 'rgba(0, 0, 255, 0.8)'
+	          })
+	        }),
+	        'red_cyan_stripe': new ol.style.Style({
+	          stroke: new ol.style.Stroke({
+	            color: 'rgb(255, 0, 0)',
+	            // lineDash: [4],
+	            width: 1
+	          }),
+	          fill: new ol.style.Fill({
+	            color: mnStripePattern
+	          })
+	        }),
+	        'cyan3': new ol.style.Style({
+	          stroke: new ol.style.Stroke({
+	            color: 'rgb(0, 191, 255)',
+	            width: 1
+	          }),
+	          fill: new ol.style.Fill({
+	            color: 'rgba(0, 191, 255, 0.4)'
+	          })
+	        }),
+	        'cyan7': new ol.style.Style({
+	          stroke: new ol.style.Stroke({
+	            color: 'rgb(0, 191, 255)',
+	            width: 1
+	          }),
+	          fill: new ol.style.Fill({
+	            color: 'rgba(0, 191, 255, 0.75)'
+	          })
+	        }),
+	        'blue_cyan_stripe': new ol.style.Style({
+	          stroke: new ol.style.Stroke({
+	            color: 'rgb(0, 0, 255)',
+	            width: 1
+	          }),
+	          fill: new ol.style.Fill({
+	            color: ilStripePattern
+	          })
+		    })
+	      };
+	    var styleFunction = function(feature) {
+	      	return styles[feature.getProperties().color_class];
+	    };
+	   	var vectorSource = new ol.source.Vector({
+	                url: '@routes.Assets.versioned("json/ne_110m_admin_1_states_provinces_shp_scale_rank.geojson")',
+	                format: new ol.format.GeoJSON()
+	             });
+	    var vector = new ol.layer.Vector({
+	             title: 'added Layer',
+	             source: vectorSource,
+	             style: styleFunction
+	         });
+		var layers = [
+		  new ol.layer.Tile({
+		            source: new ol.source.BingMaps({imagerySet: 'Road', key: '@key'})
+		          }),
+	         vector
+		];
+		var map = new ol.Map({
+		  layers: layers,
+		  target: 'map',
+		  view: new ol.View({
+		    center: [-10997148, 4569099],
+		    zoom: 5
+		  })
+		});
+
+		var ctx = document.getElementById("abortionWaitingPeriodStatesCanvas").getContext("2d");
+		ctx.fillStyle = "#FF0000";
+		ctx.fillRect(0,0,30,30);
+
+		var ctx = document.getElementById("firearmWaitingPeriodStatesCanvas").getContext("2d");
+		ctx.fillStyle = "#0000FF";
+		ctx.fillRect(0,0,30,30);
+
+		var ctx = document.getElementById("handgunWaitingPeriodStatesCanvas").getContext("2d");
+		ctx.fillStyle = "#00BFFF";
+		ctx.fillRect(0,0,30,30);
+	</script>
+}

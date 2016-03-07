@@ -1,0 +1,27 @@
+.map {
+        height: 750px;
+        width: 100%;
+      }
+
+table {
+	border: 1px solid black;
+}
+table th, td {
+	text-align: left;
+}
+table tr:nth-child(even) {
+    background-color: #eee;
+}
+table tr:nth-child(odd) {
+    background-color: #fff;
+}
+table tr#note {
+	background-color: #fff;
+}
+table tr#note td{
+	text-align: center;
+}
+div#legend {
+    width: 619px;
+    margin: 0 auto;
+}
